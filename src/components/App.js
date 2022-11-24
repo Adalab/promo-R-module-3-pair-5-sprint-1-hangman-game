@@ -5,19 +5,20 @@ function App() {
   const [numberOfErrors, setNumberOfErrors] = useState(0);
   //guarda la última letra que hayamos metido por input
   const [lastLetter, setLastLetter] = useState('');
-  //variable de estado boolean que indique si el input es válido o no
-  //boolean es un tipo de dato que solo puede tener dos valores, true o false
-  // const [isValidInput, setIsValidInput] = useState(false);
+  //guarda la palabra que tenemos que adivinar
+  const [word, setWord] = useState('katakroker');
+  //guarda todas las letras que introduzca la usuaria
+  const [userLetters, setUserLetters] = useState([]);
 
-  function handleInput(ev){
+  function handleInput(ev) {
     const regex = /^[A-Za-zÑñÁáÉéÍíÓóÚúÜü ]/g;
     //queremos que antes de guardar el input en lastLetter, compruebe que es válido
     //por eso queremos comprobar el input, no lastLetter
-   const result = ev.target.value.match(regex);
-   if (result){
+    const result = ev.target.value.match(regex);
     setLastLetter(ev.target.value);
-   }
-   
+    if (result) {
+      setUserLetters([...userLetters, ev.target.value]);
+    }
   }
 
   function handleClick(event) {
@@ -26,6 +27,17 @@ function App() {
       const result = numberOfErrors + 1;
       setNumberOfErrors(result);
     }
+  }
+
+  function renderSolutionLetters() {
+    const wordLetters = word.split('');
+    let keyLetter = 0;
+
+    return wordLetters.map((letter) => (
+      <li className="letter" key={keyLetter++}>
+        {userLetters.find((element) => element === letter) ? letter : ''}
+      </li>
+    ));
   }
 
   return (
@@ -39,18 +51,7 @@ function App() {
           <section>
             <div className="solution">
               <h2 className="title">Solución:</h2>
-              <ul className="letters">
-                <li className="letter">k</li>
-                <li className="letter">a</li>
-                <li className="letter"></li>
-                <li className="letter">a</li>
-                <li className="letter">k</li>
-                <li className="letter">r</li>
-                <li className="letter"></li>
-                <li className="letter">k</li>
-                <li className="letter">e</li>
-                <li className="letter">r</li>
-              </ul>
+              <ul className="letters">{renderSolutionLetters()}</ul>
             </div>
             <div className="error">
               <h2 className="title">Letras falladas:</h2>
@@ -76,9 +77,7 @@ function App() {
                 onInput={handleInput}
                 value={lastLetter}
                 // si dejamos el value así, hace cosas raras, preguntar mañana
-
               />
-
             </form>
           </section>
           <section className={`dummy error-${numberOfErrors}`}>
