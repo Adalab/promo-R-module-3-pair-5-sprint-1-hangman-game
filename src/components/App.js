@@ -1,16 +1,26 @@
 import '../styles/App.scss';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import callToApi from '../services/api';
+
 
 function App() {
   const [numberOfErrors, setNumberOfErrors] = useState(0);
   //guarda la última letra que hayamos metido por input
   const [lastLetter, setLastLetter] = useState('');
   //guarda la palabra que tenemos que adivinar
-  const [word, setWord] = useState('katakroker');
+  const [word, setWord] = useState('');
   //guarda todas las letras que introduzca la usuaria
   const [userLetters, setUserLetters] = useState([]);
 
+
+  useEffect(()=>{
+    callToApi().then((data)=>{
+      setWord(data);
+    });
+  }, []);
+
   function handleInput(ev) {
+    ev.preventDefault();
     const regex = /^[A-Za-zÑñÁáÉéÍíÓóÚúÜü ]/g;
     //queremos que antes de guardar el input en lastLetter, compruebe que es válido
     //por eso queremos comprobar el input, no lastLetter
@@ -19,6 +29,7 @@ function App() {
     if (result) {
       setUserLetters([...userLetters, ev.target.value]);
     }
+    paintError();
   }
 
   function handleClick(event) {
@@ -40,6 +51,22 @@ function App() {
     ));
   }
 
+  function renderErrorLetters(){
+    const ErrorLetters =  userLetters.filter(userLetters => !(word.includes(userLetters)))
+    let keyLetter = 0
+
+    return ErrorLetters.map((letter) => (
+   <li className="letter" key={keyLetter++}>{letter}</li>
+    ));
+   }
+
+   function paintError(){
+    if (numberOfErrors < 13) {
+    const ErrorLetters =  userLetters.filter(userLetters => !(word.includes(userLetters)))
+      setNumberOfErrors(ErrorLetters.length);}
+
+   }
+
   return (
     <div>
       <div className="page">
@@ -54,13 +81,9 @@ function App() {
               <ul className="letters">{renderSolutionLetters()}</ul>
             </div>
             <div className="error">
-              <h2 className="title">Letras falladas:</h2>
+              <h2 className="title">Letras falladas:</h2> 
               <ul className="letters">
-                <li className="letter">f</li>
-                <li className="letter">q</li>
-                <li className="letter">h</li>
-                <li className="letter">p</li>
-                <li className="letter">x</li>
+                {renderErrorLetters()}
               </ul>
             </div>
             <form className="form">
